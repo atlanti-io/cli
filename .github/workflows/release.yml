@@ -31,16 +31,16 @@ jobs:
             --platform linux/${{ matrix.arch }} \
             -t atlanti-builder:${{ matrix.arch }} \
             --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=${{ env.OUTPUT_DIR }} \
+            --output type=local,dest=${{ github.workspace }}/output \
             .
 
       - name: Verify the compiled binary
         run: |
-          ls -lh ${{ env.OUTPUT_DIR }}/
-          file ${{ env.OUTPUT_DIR }}/atlanti  # Confirma la arquitectura del binario generado
+          ls -lh ${{ github.workspace }}/output/
+          file ${{ github.workspace }}/output/atlanti  # Confirma la arquitectura del binario generado
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.RELEASE_NAME }}-${{ matrix.arch }}-${{ github.ref_name }}
-          path: ${{ env.OUTPUT_DIR }}/atlanti
+          path: ${{ github.workspace }}/output/atlanti
