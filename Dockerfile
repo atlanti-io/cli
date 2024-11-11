@@ -17,4 +17,5 @@ ARG ARCH
 
 RUN nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
 
-RUN chmod +x /app/output/atlanti && ls -lh /app/output/atlanti
+RUN chmod +x /app/atlanti && ls -lh /app/atlanti
+
