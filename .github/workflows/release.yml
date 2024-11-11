@@ -5,16 +5,24 @@ on:
     tags:
       - 'v*'
 
+env:
+  OUTPUT_DIR: output  # Directorio donde se generarán los binarios
+  RELEASE_NAME: atlanti  # Nombre del archivo binario final
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        architecture: [amd64, arm64]  # Selecciona amd64 y arm64 para arquitectura nativa
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+          - os: ubuntu-22.04-arm  # Runner para ARM si está configurado
+            arch: arm64
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -27,14 +35,18 @@ jobs:
           sudo apt-get install -y patchelf build-essential
 
       - name: Install Nuitka
-        run: pip install nuitka
-
-      - name: Build Binary with Nuitka
         run: |
-          nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
+          pip install nuitka
 
-      - name: Upload binary for ${{ matrix.architecture }}
+      - name: Verify architecture
+        run: uname -m  # Paso de verificación de arquitectura para confirmar
+
+      - name: Build Binary with Nuitka for ${{ matrix.arch }}
+        run: |
+          nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=${{ env.RELEASE_NAME }} main.py
+
+      - name: Upload binary for ${{ matrix.arch }}
         uses: actions/upload-artifact@v3
         with:
-          name: atlanti-${{ matrix.architecture }}-${{ github.ref_name }}
-          path: atlanti
+          name: ${{ env.RELEASE_NAME }}-${{ matrix.arch }}-${{ github.ref_name }}
+          path: ${{ env.RELEASE_NAME }}
