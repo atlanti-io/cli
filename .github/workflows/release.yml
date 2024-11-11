@@ -1,52 +1,46 @@
-name: Release Build
+name: Build and Release
 
 on:
   push:
     tags:
       - 'v*'
 
-env:
-  OUTPUT_DIR: output  # Directorio donde se generarán los binarios
-  RELEASE_NAME: atlanti  # Nombre del archivo binario final
-
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            arch: amd64
-          - os: ubuntu-22.04-arm  # Runner para ARM si está configurado
-            arch: arm64
+        arch: [amd64, arm64]
+    env:
+      OUTPUT_DIR: /app/output  # Directorio donde se almacenará el binario compilado
+      RELEASE_NAME: atlanti  # Nombre del binario final
 
     steps:
-      - name: Check out the code
+      - name: Checkout the code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y patchelf build-essential
-
-      - name: Install Nuitka
-        run: |
-          pip install nuitka
-
-      - name: Verify architecture
-        run: uname -m  # Paso de verificación de arquitectura para confirmar
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Build Binary with Nuitka for ${{ matrix.arch }}
         run: |
-          nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=${{ env.RELEASE_NAME }} main.py
+          # Crear el directorio de salida
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          # Construcción multiplataforma
+          docker buildx build \
+            --platform linux/${{ matrix.arch }} \
+            -t atlanti-builder:${{ matrix.arch }} \
+            --build-arg ARCH=${{ matrix.arch }} \
+            --output type=local,dest=${{ env.OUTPUT_DIR }} \
+            .
 
-      - name: Upload binary for ${{ matrix.arch }}
+      - name: Verify the compiled binary
+        run: |
+          ls -lh ${{ env.OUTPUT_DIR }}/
+          file ${{ env.OUTPUT_DIR }}/atlanti  # Confirma la arquitectura del binario generado
+
+      - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.RELEASE_NAME }}-${{ matrix.arch }}-${{ github.ref_name }}
-          path: ${{ env.RELEASE_NAME }}
+          path: ${{ env.OUTPUT_DIR }}/atlanti
