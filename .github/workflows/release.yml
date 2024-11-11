@@ -10,9 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        architecture: [amd64, aarch64]
-    env:
-      OUTPUT_DIR: output
+        architecture: [amd64, arm64]  # Selecciona amd64 y arm64 para arquitectura nativa
 
     steps:
       - name: Check out the code
@@ -29,10 +27,9 @@ jobs:
           sudo apt-get install -y patchelf build-essential
 
       - name: Install Nuitka
-        run: |
-          pip install nuitka
+        run: pip install nuitka
 
-      - name: Build Binary with Nuitka for ${{ matrix.architecture }}
+      - name: Build Binary with Nuitka
         run: |
           nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
 
