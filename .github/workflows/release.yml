@@ -3,15 +3,16 @@ name: Release Build
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  # Trigger only on tags that start with "v" (e.g., v1.0.0)
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        architecture: [amd64, arm64]
+        architecture: [amd64, arm64]  # Define architectures for x64 and aarch64
+    env:
+      OUTPUT_DIR: output  # Directory for output binaries
 
     steps:
       - name: Check out the code
@@ -22,24 +23,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install build dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential patchelf
+          sudo apt-get install -y patchelf build-essential
 
-      - name: Install Nuitka and requirements
+      - name: Install Nuitka
         run: |
           pip install nuitka
-          pip install -r requirements.txt
 
-      - name: Compile the application with Nuitka for ${{ matrix.architecture }}
+      - name: Build Binary with Nuitka for ${{ matrix.architecture }}
         run: |
           nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
 
-      - name: Rename and upload binary
-        run: |
-          mv atlanti output/atlanti-${{ matrix.architecture }}
+      - name: Upload binary for ${{ matrix.architecture }}
         uses: actions/upload-artifact@v2
         with:
           name: atlanti-${{ matrix.architecture }}-${{ github.ref_name }}
-          path: output/
+          path: atlanti
