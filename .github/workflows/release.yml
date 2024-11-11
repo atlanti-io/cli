@@ -1,0 +1,64 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch: [amd64, arm64]  # Los valores se mantienen como 'amd64' y 'arm64'
+    env:
+      OUTPUT_DIR: ./output  # Directorio local para el binario compilado
+      RELEASE_NAME: atlanti  # Nombre del binario final
+
+    runs-on: ${{ matrix.arch == 'arm64' && 'self-hosted' || 'ubuntu-latest' }}
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf build-essential
+
+      - name: Install Nuitka
+        run: |
+          pip install nuitka
+
+      - name: Build Binary for ${{ matrix.arch }} with Nuitka
+        run: |
+          # Crear el directorio de salida
+          mkdir -p ./output
+
+          docker buildx build \
+            --platform linux/${{ matrix.arch }} \
+            -t atlanti-builder:${{ matrix.arch }} \
+            --build-arg ARCH=${{ matrix.arch }} \
+            --load \
+            .
+
+          docker create --platform linux/${{ matrix.arch }} --name extract atlanti-builder:${{ matrix.arch }}
+          # Copiar el binario desde el contenedor al host
+          docker cp extract:/app/atlanti ./output/atlanti-${{ matrix.arch }}
+          # Eliminar el contenedor temporal
+          docker rm extract
+
+      - name: Verify the compiled binary
+        run: |
+          ls -lh ./output/
+          file ./output/atlanti-${{ matrix.arch }}
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.RELEASE_NAME }}-${{ matrix.arch }}-${{ github.ref_name }}
+          path: ./output/atlanti-${{ matrix.arch }}

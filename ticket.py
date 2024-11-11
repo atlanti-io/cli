@@ -8,7 +8,7 @@ import re  # Importing regex for email validation
 
 console = Console()
 
-API_URL = "https://6731fd217aaf2a9aff13009e.mockapi.io/api/v1"
+API_URL = "https://support.atlanti.io/api/v1"
 
 EMAIL_REGEX = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
 
@@ -48,7 +48,7 @@ def verify_otp(email, otp):
     try:
         response = requests.post(f"{API_URL}/verify-otp", json={"email": email, "otp": otp}, timeout=15)
         if response.status_code == 200 or response.status_code == 201:
-            return response.json().get("token")  # Assuming the server returns a token
+            return response.json().get("token")  # Retorna el token
         elif response.status_code == 400:
             console.print("[red]Invalid OTP: Please check the code and try again.[/red]")
         elif response.status_code == 401:
@@ -73,9 +73,8 @@ def submit_ticket(description, message, email, otp_token):
         response = requests.post(f"{API_URL}/submit-ticket", json={
             "description": description,
             "message": message,
-            "email": email,
-            "otp_token": otp_token  # Send the OTP token with the ticket
-        }, timeout=15)
+            "email": email
+        }, headers={"Authorization": f"Bearer {otp_token}"}, timeout=15)
         if response.status_code == 200:
             return True
         elif response.status_code == 400:
@@ -93,6 +92,7 @@ def submit_ticket(description, message, email, otp_token):
         if not retry_or_cancel("submit ticket"):
             return False
     return False
+
 
 def is_valid_email(email):
     """Validates the email format using regex."""
@@ -139,8 +139,10 @@ def open_ticket():
 
         if submit_ticket(short_description, message, email, otp_token):
             console.clear()
-            console.print(Panel("✅ [bold green]Ticket sent successfully![/bold green]", expand=False, style="green"))
-            time.sleep(3)  # Show confirmation for 3 seconds
+            console.print(Panel("[bold green]Ticket sent successfully![/bold green]\n\n"
+                                "[bold]A copy of the ticket and instructions have been sent to your email.[/bold]",
+                                expand=False, style="green"))
+            time.sleep(5)  # Show confirmation for 3 seconds
         else:
             console.print("[red]Failed to send the ticket. Please try again later.[/red]")
             console.input("Press Enter to return to the main menu.")  # Pause before returning

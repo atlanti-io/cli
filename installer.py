@@ -5,10 +5,9 @@ from rich.panel import Panel
 from rich.live import Live
 import os
 import tempfile
+from rich.text import Text
 
 console = Console()
-
-GREEN_CHECK = "\033[92m✓\033[0m"
 
 
 def load_yaml(file_path):
@@ -67,9 +66,12 @@ def install_app(yaml_file):
                     console.input("\nPress Enter to continue.")
                     return
 
-            live.update(
-                Panel(f"{GREEN_CHECK} {title} installed successfully.\n\nPress Enter to continue.", style="green",
-                      expand=False))
+            text = Text(f"✓ {title} installed successfully", style="green")
+            text.append("\nPress Enter to continue.")
+
+            live.update(text)
+
+
             console.input()
 
 
@@ -85,7 +87,7 @@ def list_installable_apps():
         check_command = app_config.get("check_command", "")
 
         if check_command and is_installed(check_command):
-            title = f"{GREEN_CHECK} {title}"
+            title = f"✓ {title}"
 
         apps_with_status.append((file, title))
 
