@@ -24,23 +24,33 @@ jobs:
 
       - name: Build Binary with Nuitka for ${{ matrix.arch }}
         run: |
-          # Crear el directorio de salida en el entorno de trabajo
-          mkdir -p ${{ github.workspace }}/output
-          # Construcción multiplataforma
+          # Crear el directorio de salida
+          mkdir -p ./output
+
+          # Construir la imagen Docker
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
             -t atlanti-builder:${{ matrix.arch }} \
             --build-arg ARCH=${{ matrix.arch }} \
-            --output type=local,dest=${{ github.workspace }}/output \
+            --load \
             .
+
+          # Crear un contenedor temporal desde la imagen
+          docker create --platform linux/${{ matrix.arch }} --name extract atlanti-builder:${{ matrix.arch }}
+
+          # Copiar el binario desde el contenedor al host
+          docker cp extract:/app/atlanti ./output/atlanti-${{ matrix.arch }}
+
+          # Eliminar el contenedor temporal
+          docker rm extract
 
       - name: Verify the compiled binary
         run: |
-          ls -lh ${{ github.workspace }}/output/
-          file ${{ github.workspace }}/output/atlanti  # Confirma la arquitectura del binario generado
+          ls -lh ./output/
+          file ./output/atlanti-${{ matrix.arch }}  # Confirma la arquitectura del binario generado
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.RELEASE_NAME }}-${{ matrix.arch }}-${{ github.ref_name }}
-          path: ${{ github.workspace }}/output/atlanti
+          path: ./output/atlanti-${{ matrix.arch }}
