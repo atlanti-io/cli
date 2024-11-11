@@ -3,16 +3,16 @@ name: Release Build
 on:
   push:
     tags:
-      - 'v*'  # Trigger only on tags that start with "v" (e.g., v1.0.0)
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        architecture: [amd64, arm64]  # Define architectures for x64 and aarch64
+        architecture: [amd64, aarch64]
     env:
-      OUTPUT_DIR: output  # Directory for output binaries
+      OUTPUT_DIR: output
 
     steps:
       - name: Check out the code
