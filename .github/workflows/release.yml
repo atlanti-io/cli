@@ -37,7 +37,7 @@ jobs:
           nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
 
       - name: Upload binary for ${{ matrix.architecture }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: atlanti-${{ matrix.architecture }}-${{ github.ref_name }}
           path: atlanti
