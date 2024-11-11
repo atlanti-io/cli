@@ -12,7 +12,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     env:
-      OUTPUT_DIR: ./output  # Directorio local en $GITHUB_WORKSPACE para el binario compilado
+      OUTPUT_DIR: ./output  # Directorio local para el binario compilado
       RELEASE_NAME: atlanti  # Nombre del binario final
 
     steps:
