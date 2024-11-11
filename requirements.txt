@@ -1,0 +1,5 @@
+cutie
+psutil
+requests
+rich
+PyYAML

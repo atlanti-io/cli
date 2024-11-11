@@ -1,0 +1,8 @@
+title: "Redis"
+description: "Installs Redis, an in-memory data structure store used as a database, cache, and message broker."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y redis-server"
+  - "sudo systemctl enable redis-server.service"
+  - "sudo systemctl start redis-server.service"
+check_command: "systemctl is-active --quiet redis-server"

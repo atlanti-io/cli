@@ -1,0 +1,6 @@
+title: "Docker"
+description: "Installs Docker on the server."
+commands:
+  - "curl -fsSL https://get.docker.com -o get-docker.sh"
+  - "sh get-docker.sh"
+check_command: "docker --version"

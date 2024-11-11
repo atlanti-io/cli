@@ -1,0 +1,6 @@
+title: "Python"
+description: "Installs Python, a popular programming language that lets you work quickly and integrate systems more effectively."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y python3 python3-pip"
+check_command: "python3 --version"

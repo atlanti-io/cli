@@ -1,0 +1,7 @@
+title: "MySQL"
+description: "Installs MySQL, a popular open-source relational database management system."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y mysql-server"
+  - "sudo mysql_secure_installation"
+check_command: "systemctl is-active --quiet mysql"

@@ -1,0 +1,6 @@
+title: "Nginx"
+description: "Installs Nginx as a web server."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y nginx"
+check_command: "nginx -v && systemctl is-active --quiet nginx"

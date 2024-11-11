@@ -1,0 +1,8 @@
+title: "UFW (Uncomplicated Firewall)"
+description: "Installs UFW, a firewall configuration tool to manage iptables."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y ufw"
+  - "sudo ufw allow OpenSSH"
+  - "sudo ufw enable"
+check_command: "ufw status | grep -i active"

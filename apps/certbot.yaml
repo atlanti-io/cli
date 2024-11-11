@@ -1,0 +1,7 @@
+title: "Certbot"
+description: "Installs Certbot, a tool to automate the process of getting and renewing Let's Encrypt SSL certificates."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y certbot"
+  - "sudo apt install -y python3-certbot-nginx"
+check_command: "certbot --version"

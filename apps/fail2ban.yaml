@@ -1,0 +1,8 @@
+title: "Fail2ban"
+description: "Installs Fail2ban, a tool to protect your server against brute-force attacks."
+commands:
+  - "sudo apt update"
+  - "sudo apt install -y fail2ban"
+  - "sudo systemctl enable fail2ban"
+  - "sudo systemctl start fail2ban"
+check_command: "systemctl is-active --quiet fail2ban"
