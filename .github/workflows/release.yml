@@ -12,7 +12,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     env:
-      OUTPUT_DIR: /app/output  # Directorio donde se almacenará el binario compilado
+      OUTPUT_DIR: ./output  # Directorio local en $GITHUB_WORKSPACE para el binario compilado
       RELEASE_NAME: atlanti  # Nombre del binario final
 
     steps:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Binary with Nuitka for ${{ matrix.arch }}
         run: |
-          # Crear el directorio de salida
+          # Crear el directorio de salida en el entorno de trabajo
           mkdir -p ${{ env.OUTPUT_DIR }}
           # Construcción multiplataforma
           docker buildx build \
