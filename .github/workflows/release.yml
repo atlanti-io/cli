@@ -14,36 +14,50 @@ jobs:
       OUTPUT_DIR: ./output  # Directorio local para el binario compilado
       RELEASE_NAME: atlanti  # Nombre del binario final
 
-    runs-on: ${{ matrix.arch == 'arm64' && 'macos-latest' || 'self-hosted' }}  # Usar macOS para ARM y Ubuntu para x64
+    runs-on: ${{ matrix.arch == 'arm64' && 'macos-latest' || 'ubuntu-latest' }}  # Usar macOS para ARM y Ubuntu para x64
 
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
 
-      - name: Build Binary with Nuitka for ${{ matrix.arch }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf build-essential
+
+      - name: Install Nuitka
+        run: |
+          pip install nuitka
+
+      - name: Build Binary for ${{ matrix.arch }} with Nuitka
         run: |
           # Crear el directorio de salida
           mkdir -p ./output
 
-          # Construir la imagen Docker
-          docker buildx build \
-            --platform linux/${{ matrix.arch }} \
-            -t atlanti-builder:${{ matrix.arch }} \
-            --build-arg ARCH=${{ matrix.arch }} \
-            --load \
-            .
-
-          # Crear un contenedor temporal desde la imagen
-          docker create --platform linux/${{ matrix.arch }} --name extract atlanti-builder:${{ matrix.arch }}
-
-          # Copiar el binario desde el contenedor al host
-          docker cp extract:/app/atlanti ./output/atlanti-${{ matrix.arch }}
-
-          # Eliminar el contenedor temporal
-          docker rm extract
+          if [ "${{ matrix.arch }}" == "amd64" ]; then
+            # Construir la imagen Docker solo para amd64
+            docker buildx build \
+              --platform linux/${{ matrix.arch }} \
+              -t atlanti-builder:${{ matrix.arch }} \
+              --build-arg ARCH=${{ matrix.arch }} \
+              --load \
+              .
+            # Crear un contenedor temporal desde la imagen
+            docker create --platform linux/${{ matrix.arch }} --name extract atlanti-builder:${{ matrix.arch }}
+            # Copiar el binario desde el contenedor al host
+            docker cp extract:/app/atlanti ./output/atlanti-${{ matrix.arch }}
+            # Eliminar el contenedor temporal
+            docker rm extract
+          else
+            # Para ARM, no usar Docker y compilar directamente en el runner
+            nuitka --standalone --onefile --include-data-dir=apps=apps --output-filename=atlanti main.py
+            mv atlanti ./output/atlanti-${{ matrix.arch }}
+          fi
 
       - name: Verify the compiled binary
         run: |
