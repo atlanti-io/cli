@@ -47,7 +47,7 @@ jobs:
       - name: Verify the compiled binary
         run: |
           ls -lh ./output/
-          file ./output/atlanti-${{ matrix.arch }}  # Confirma la arquitectura del binario generado
+          file ./output/atlanti-${{ matrix.arch }}
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
