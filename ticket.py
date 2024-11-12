@@ -139,8 +139,10 @@ def open_ticket():
 
         if submit_ticket(short_description, message, email, otp_token):
             console.clear()
-            console.print(Panel("✅ [bold green]Ticket sent successfully![/bold green]", expand=False, style="green"))
-            time.sleep(3)  # Show confirmation for 3 seconds
+            console.print(Panel("[bold green]Ticket sent successfully![/bold green]\n\n"
+                                "[bold]A copy of the ticket and instructions have been sent to your email.[/bold]",
+                                expand=False, style="green"))
+            time.sleep(5)  # Show confirmation for 3 seconds
         else:
             console.print("[red]Failed to send the ticket. Please try again later.[/red]")
             console.input("Press Enter to return to the main menu.")  # Pause before returning
