@@ -14,7 +14,7 @@ jobs:
       OUTPUT_DIR: ./output  # Directorio local para el binario compilado
       RELEASE_NAME: atlanti  # Nombre del binario final
 
-    runs-on: ${{ matrix.arch == 'arm64' && 'macos-latest' || 'ubuntu-latest' }}  # Usar macOS para ARM y Ubuntu para x64
+    runs-on: ${{ matrix.arch == 'arm64' && 'self-hosted' || 'ubuntu-latest' }}
 
     steps:
       - name: Checkout the code
