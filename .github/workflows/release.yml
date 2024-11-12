@@ -35,9 +35,10 @@ jobs:
             --build-arg ARCH=${{ matrix.arch }} \
             --output type=local,dest=./output \
             .
-
-          # Renombrar el binario compilado
-          mv ./output/atlanti ./output/atlanti-${{ matrix.arch }}
+          
+          docker create --platform linux/${{ matrix.arch }} --name extract atlanti-builder:${{ matrix.arch }}
+          docker cp extract:/app/atlanti ./output/atlanti-${{ matrix.arch }}
+          docker rm extract
 
       - name: Verify the compiled binary
         run: |
