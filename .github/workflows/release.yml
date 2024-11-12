@@ -7,13 +7,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64, arm64]  # Los valores se mantienen como 'amd64' y 'arm64'
     env:
       OUTPUT_DIR: ./output  # Directorio local para el binario compilado
       RELEASE_NAME: atlanti  # Nombre del binario final
+
+    runs-on: ${{ matrix.arch == 'arm64' && 'macos-latest' || 'ubuntu-latest' }}  # Usar macOS para ARM y Ubuntu para x64
 
     steps:
       - name: Checkout the code
